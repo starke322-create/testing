@@ -21,85 +21,48 @@
       font-family: var(--primary-font);
       color: #222;
       min-height: 100vh;
+      box-sizing: border-box;
     }
     body {
       max-width: 570px;
       margin: 0 auto;
       padding: 1em 0.5em 3em 0.5em;
+      box-sizing: border-box;
     }
     h1 {
-      font-size: 1.5em;
+      font-size: 1.3em;
       margin-bottom: 1em;
       text-align: center;
       color: var(--primary-accent);
       letter-spacing: 1px;
+      font-weight: 700;
     }
     form {
       background: #fff;
-      padding: 1.2em 1em 1.2em 1em;
+      padding: 1em 0.7em 1em 0.7em;
       border-radius: var(--primary-radius);
       box-shadow: 0 2px 8px 0 #0001;
-      margin-bottom: 1.5em;
+      margin-bottom: 1em;
     }
     label {
       display: block;
-      margin-top: 1em;
+      margin-top: 0.7em;
       font-weight: 500;
       font-size: 1em;
     }
-    .metric-row {
-      margin-bottom: 1.3em;
-    }
-    .metric-label {
-      font-weight: 500;
+    select, input[type="text"], button {
       font-size: 1em;
-      margin-bottom: 0.3em;
-      display: block;
-    }
-    .entry-row {
-      display: flex;
-      gap: 0.8em;
-      margin-top: 0.2em;
-    }
-    .entry-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .entry-label {
-      font-size: 0.97em;
-      margin-bottom: 0.15em;
-      font-weight: 400;
-      color: #777;
-    }
-    .target-input {
-      font-size: 1em;
-      padding: 0.55em;
-      border: 1.5px solid var(--primary-accent);
-      border-radius: var(--primary-radius);
-      background: #f3f3f3;
-      color: var(--target-entry-color);
-      font-weight: 500;
-      box-sizing: border-box;
-      transition: border 0.2s, box-shadow 0.2s;
-    }
-    .target-input:focus {
-      outline: none;
-      border: 2px solid var(--primary-accent);
-      box-shadow: 0 0 3px 1.5px #d32f2f40;
-    }
-    .current-input {
-      font-size: 1em;
-      padding: 0.55em;
+      width: 100%;
+      padding: 0.6em;
       border: 1px solid var(--primary-border);
       border-radius: var(--primary-radius);
-      background: #fcfcfc;
-      color: #222;
-      font-weight: 500;
       box-sizing: border-box;
-      transition: border 0.2s, box-shadow 0.2s;
+      margin-top: 0.4em;
+      margin-bottom: 0.4em;
+      background: #fcfcfc;
+      transition: box-shadow 0.2s, border 0.2s;
     }
-    .current-input:focus {
+    select:focus, input[type="text"]:focus, .target-input:focus {
       outline: none;
       border: 1.5px solid var(--primary-accent);
       box-shadow: 0 0 3px 1.5px #d32f2f40;
@@ -113,74 +76,79 @@
       margin-bottom: 0;
       border: none;
       transition: background 0.2s;
-      font-size: 1.05em;
+      font-size: 1em;
+      border-radius: var(--primary-radius);
     }
     button:hover, button:focus {
       background: #a62828;
     }
     .actions {
       display: flex;
-      gap: 0.7em;
-      margin-top: 1.2em;
+      gap: 0.5em;
+      margin-top: 1em;
       flex-wrap: wrap;
     }
     .actions > button {
       flex: 1;
-      min-width: 120px;
+      min-width: 90px;
+      font-size: 0.98em;
     }
-    .header-row th {
-      font-size: 1.06em;
-      letter-spacing: 0.5px;
-      padding: 0.6em 0.1em;
+    .metric-row {
+      margin-bottom: 1em;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1em;
-      background: #fff;
-      border-radius: var(--primary-radius);
-      overflow: hidden;
-      box-shadow: 0 2px 8px 0 #0001;
-      font-size: 0.97em;
-    }
-    th, td {
-      border: 1px solid var(--primary-border);
-      padding: 0.5em 0.2em;
-      text-align: center;
-      vertical-align: middle;
-    }
-    th {
-      background: #ffebee;
-      color: var(--primary-accent);
-    }
-    .target-cell {
-      background: var(--target-highlight) !important;
+    .metric-label {
       font-weight: 600;
-      color: var(--primary-accent) !important;
-    }
-    #tableTitle {
-      text-align: center;
-      font-weight: 600;
-      font-size: 1.13em;
-      margin: 1.1em 0 0.2em 0;
-      color: var(--primary-accent);
-      letter-spacing: 0.6px;
-    }
-    #printMeta {
-      text-align: center;
-      margin-bottom: 12px;
-      color: #444;
       font-size: 1em;
+      margin-bottom: 0.2em;
+      display: block;
     }
-    .hidden { display: none !important; }
+    .entry-row {
+      display: flex;
+      gap: 0.6em;
+      margin-top: 0.1em;
+    }
+    .entry-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .entry-label {
+      font-size: 0.97em;
+      margin-bottom: 0.08em;
+      font-weight: 400;
+      color: #777;
+    }
+    .target-input {
+      font-size: 1em;
+      padding: 0.45em;
+      border: 1.5px solid var(--primary-accent);
+      border-radius: var(--primary-radius);
+      background: #f3f3f3;
+      color: var(--target-entry-color);
+      font-weight: 500;
+      box-sizing: border-box;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
+    .current-input {
+      font-size: 1em;
+      padding: 0.45em;
+      border: 1px solid var(--primary-border);
+      border-radius: var(--primary-radius);
+      background: #fcfcfc;
+      color: #222;
+      font-weight: 500;
+      box-sizing: border-box;
+      transition: border 0.2s, box-shadow 0.2s;
+    }
     .reset-targets-btn {
-      margin-top: 1.5em;
+      margin-top: 1.1em;
+      margin-bottom: 0.3em;
       background: #757575;
       color: #fff;
       border: none;
       border-radius: var(--primary-radius);
-      padding: 0.7em 1.1em;
-      font-size: 1em;
+      padding: 0.6em 1em;
+      font-size: 0.97em;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
@@ -190,22 +158,76 @@
     .reset-targets-btn:hover, .reset-targets-btn:focus {
       background: #a62828;
     }
+    #tableTitle {
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1em;
+      margin: 0.8em 0 0.2em 0;
+      color: var(--primary-accent);
+      letter-spacing: 0.6px;
+    }
+    #printMeta {
+      text-align: center;
+      margin-bottom: 8px;
+      color: #444;
+      font-size: 0.97em;
+      word-break: break-word;
+    }
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: var(--primary-radius);
+      box-shadow: 0 2px 8px 0 #0001;
+      padding: 0.2em 0.2em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5em 0 0.8em 0;
+      background: #fff;
+      font-size: 0.97em;
+      min-width: 530px;
+    }
+    th, td {
+      border: 1px solid var(--primary-border);
+      padding: 0.45em 0.1em;
+      text-align: center;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+    th {
+      background: #ffebee;
+      color: var(--primary-accent);
+      font-size: 1em;
+      font-weight: 700;
+    }
+    .target-cell {
+      background: var(--target-highlight) !important;
+      font-weight: 700;
+      color: var(--primary-accent) !important;
+    }
     @media (max-width: 700px) {
+      body {
+        padding: 0.2em 0.05em 2em 0.05em;
+      }
       .entry-row {
         flex-direction: column;
-        gap: 0.4em;
+        gap: 0.3em;
       }
       table, thead, tbody, th, td, tr {
         display: block;
       }
       table {
         font-size: 1em;
+        min-width: 0;
       }
       thead {
         display: none;
       }
       tr {
-        margin-bottom: 1.08em;
+        margin-bottom: 1em;
         background: #fff;
         box-shadow: 0 1px 4px 0 #0001;
         border-radius: var(--primary-radius);
@@ -214,16 +236,16 @@
         border: none;
         border-bottom: 1px solid #eee;
         position: relative;
-        padding-left: 48%;
+        padding-left: 45%;
         text-align: left;
-        min-height: 36px;
+        min-height: 30px;
       }
       td:before {
         position: absolute;
         top: 0;
         left: 0;
-        width: 46%;
-        padding-left: 0.6em;
+        width: 44%;
+        padding-left: 0.5em;
         font-weight: 600;
         white-space: pre-wrap;
         color: #555;
@@ -231,26 +253,23 @@
       tr td:first-child {
         background: #ffebee;
         border-radius: var(--primary-radius) var(--primary-radius) 0 0;
-        font-weight: 600;
+        font-weight: 700;
         padding-left: 1em;
         color: var(--primary-accent);
-        font-size: 1.08em;
+        font-size: 1em;
       }
     }
     @media (max-width: 430px) {
-      html, body {
-        padding: 0;
-      }
       form, table {
         border-radius: 0;
         box-shadow: none;
       }
       .actions > button {
-        font-size: 0.96em;
+        font-size: 0.93em;
         min-width: 0;
       }
       #tableTitle {
-        font-size: 1em;
+        font-size: 0.97em;
       }
     }
     @media print {
@@ -263,7 +282,7 @@
       h1, #metricsSection, .actions, .form-metrics, #backToMetrics, #clearAllData, #printTableBtn, #selectionSection, #metricsForm, button, .actions, .hidden, .reset-targets-btn {
         display: none !important;
       }
-      #tableSection, #tableTitle, #printMeta, table, thead, tbody, tr, th, td {
+      #tableSection, #tableTitle, #printMeta, .table-container, table, thead, tbody, tr, th, td {
         display: block !important;
         color: #000;
       }
@@ -273,13 +292,13 @@
       }
       #tableTitle, #printMeta {
         margin-top: 0;
-        margin-bottom: 6px;
-        font-size: 1.2em;
+        margin-bottom: 4px;
+        font-size: 1.1em;
         color: #000 !important;
       }
       table {
-        font-size: 0.98em;
-        margin-top: 0.3em;
+        font-size: 0.92em;
+        margin-top: 0.2em;
         border-radius: 0;
         box-shadow: none;
         width: 100%;
@@ -288,7 +307,7 @@
         color: #000 !important;
         border: 1px solid #999 !important;
         background: #fff !important;
-        padding: 0.35em 0.08em;
+        padding: 0.3em 0.06em;
       }
       th {
         color: #000 !important;
@@ -296,7 +315,7 @@
       }
       @page {
         size: portrait;
-        margin: 0.5in 0.3in 0.5in 0.3in;
+        margin: 0.45in 0.18in 0.45in 0.18in;
       }
     }
   </style>
@@ -308,32 +327,27 @@
   <!-- Selection Page -->
   <div id="selectionSection">
     <form id="selectionForm" autocomplete="off">
-      <label>
-        Area:
+      <label>Area:
         <select id="areaDropdown" required>
           <option value="">--Select Area--</option>
         </select>
       </label>
-      <label>
-        Region:
+      <label>Region:
         <select id="regionDropdown" required disabled>
           <option value="">--Select Region--</option>
         </select>
       </label>
-      <label>
-        District:
+      <label>District:
         <select id="districtDropdown" required disabled>
           <option value="">--Select District--</option>
         </select>
       </label>
-      <label>
-        Store:
+      <label>Store:
         <select id="storeDropdown" required disabled>
           <option value="">--Select Store--</option>
         </select>
       </label>
-      <label>
-        Select Week: 
+      <label>Select Week: 
         <select id="weekSelect" required>
           <option value="">--Select Week--</option>
           <option value="1">Week 1</option>
@@ -365,11 +379,11 @@
   <div id="tableSection" class="hidden">
     <div id="printMeta"></div>
     <h2 id="tableTitle"></h2>
-    <div id="tableWrapper">
+    <div class="table-container" id="tableWrapper">
       <table id="mainMetricsTable">
         <thead>
           <tr class="header-row" id="metricsHeaderRow">
-            <!-- Headers will be rendered dynamically -->
+            <!-- Headers rendered dynamically -->
           </tr>
         </thead>
         <tbody id="metricsTable"></tbody>
@@ -383,7 +397,7 @@
   </div>
 
   <script>
-    // --- Metric definitions, formatters, and default targets ---
+    // Metric definitions, formatters, and default targets
     const metrics = [
       "Net Trending GP", "Current Rank", "Current Quintile", "Bottom Metrics",
       "GP % Target", "GP per HR", "Voice", "BTS", "TFB", "VAF",
@@ -404,7 +418,6 @@
       "Bottom Metrics": v => v,
       "CSAT": v => v
     };
-    // Default Target Values
     const defaultTargets = {
       "Net Trending GP": "",
       "Current Rank": "86",
@@ -459,7 +472,6 @@
     const backToMetricsBtn = document.getElementById('backToMetrics');
     const clearAllDataBtn = document.getElementById('clearAllData');
     const printTableBtn = document.getElementById('printTableBtn');
-    const tableActions = document.getElementById('tableActions');
     const tableWrapper = document.getElementById('tableWrapper');
 
     // State
@@ -674,7 +686,7 @@
     };
 
     printTableBtn.onclick = function() {
-      // Temporarily set tableWrapper size for print fit
+      // Set the table container to max width for print screenshot
       tableWrapper.style.maxWidth = "900px";
       tableWrapper.style.margin = "0 auto";
       html2canvas(tableSection, {
@@ -688,7 +700,6 @@
       }).then(function(canvas) {
         tableWrapper.style.maxWidth = "";
         tableWrapper.style.margin = "";
-        // Open in new window centered, fit to page with print CSS
         let win = window.open('', '_blank');
         win.document.write(`
           <html>
@@ -762,7 +773,7 @@
       });
       printMeta.textContent = `Area: ${selectedArea} | Region: ${selectedRegion} | District: ${selectedDistrict} | Store: ${selectedStore} | Printed: ${dtStr}`;
 
-      // Set table headers, first column uses store name
+      // Table headers, first column is store name
       let headerHTML = `
         <th>${selectedStore ? selectedStore : "Metric"}</th>
         <th>Target</th>
