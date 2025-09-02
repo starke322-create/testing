@@ -12,6 +12,7 @@
       --primary-radius: 8px;
       --primary-font: 'Segoe UI', Arial, sans-serif;
       --target-highlight: #fff59d;
+      --target-entry-color: #d32f2f;
     }
     html, body {
       margin: 0;
@@ -33,9 +34,6 @@
       color: var(--primary-accent);
       letter-spacing: 1px;
     }
-    .red-accent {
-      color: var(--primary-accent) !important;
-    }
     form {
       background: #fff;
       padding: 1.2em 1em 1.2em 1em;
@@ -49,36 +47,59 @@
       font-weight: 500;
       font-size: 1em;
     }
-    .target-label {
-      margin-top: 0.5em;
+    .metric-row {
+      margin-bottom: 1.3em;
+    }
+    .metric-label {
+      font-weight: 500;
+      font-size: 1em;
+      margin-bottom: 0.3em;
+      display: block;
+    }
+    .entry-row {
+      display: flex;
+      gap: 0.8em;
+      margin-top: 0.2em;
+    }
+    .entry-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .entry-label {
+      font-size: 0.97em;
+      margin-bottom: 0.15em;
       font-weight: 400;
-      font-size: 0.98em !important;
-      color: #666;
+      color: #777;
     }
     .target-input {
-      font-size: 0.98em;
-      margin-top: 0.3em;
-      margin-bottom: 0.1em;
+      font-size: 1em;
       padding: 0.55em;
-      width: 100%;
-      border: 1px solid var(--primary-border);
+      border: 1.5px solid var(--primary-accent);
       border-radius: var(--primary-radius);
       background: #f3f3f3;
+      color: var(--target-entry-color);
+      font-weight: 500;
       box-sizing: border-box;
+      transition: border 0.2s, box-shadow 0.2s;
     }
-    select, input[type="text"], button {
+    .target-input:focus {
+      outline: none;
+      border: 2px solid var(--primary-accent);
+      box-shadow: 0 0 3px 1.5px #d32f2f40;
+    }
+    .current-input {
       font-size: 1em;
-      width: 100%;
-      padding: 0.65em;
+      padding: 0.55em;
       border: 1px solid var(--primary-border);
       border-radius: var(--primary-radius);
-      box-sizing: border-box;
-      margin-top: 0.5em;
-      margin-bottom: 0.5em;
       background: #fcfcfc;
-      transition: box-shadow 0.2s, border 0.2s;
+      color: #222;
+      font-weight: 500;
+      box-sizing: border-box;
+      transition: border 0.2s, box-shadow 0.2s;
     }
-    select:focus, input[type="text"]:focus, .target-input:focus {
+    .current-input:focus {
       outline: none;
       border: 1.5px solid var(--primary-accent);
       box-shadow: 0 0 3px 1.5px #d32f2f40;
@@ -106,14 +127,6 @@
     .actions > button {
       flex: 1;
       min-width: 120px;
-    }
-    .form-metrics label {
-      margin: 0.8em 0 0.2em 0;
-      font-weight: 400;
-      font-size: 0.98em;
-    }
-    .form-metrics input[type="text"] {
-      margin-bottom: 0.1em;
     }
     .header-row th {
       font-size: 1.06em;
@@ -143,6 +156,7 @@
     .target-cell {
       background: var(--target-highlight) !important;
       font-weight: 600;
+      color: var(--primary-accent) !important;
     }
     #tableTitle {
       text-align: center;
@@ -177,6 +191,10 @@
       background: #a62828;
     }
     @media (max-width: 700px) {
+      .entry-row {
+        flex-direction: column;
+        gap: 0.4em;
+      }
       table, thead, tbody, th, td, tr {
         display: block;
       }
@@ -230,9 +248,6 @@
       .actions > button {
         font-size: 0.96em;
         min-width: 0;
-      }
-      .form-metrics label {
-        font-size: 0.96em;
       }
       #tableTitle {
         font-size: 1em;
@@ -388,13 +403,12 @@
       "VAF": v => formatDollar(v),
       "Accessories": v => formatPercentNoDecimal(v),
       "AAL Attainment": v => formatPercentNoDecimal(v),
-      // Raw for these below, since their targets aren't formatted as percent/dollar
       "Current Rank": v => v,
       "Current Quintile": v => v,
       "Bottom Metrics": v => v,
       "CSAT": v => v
     };
-    // Default Target Values (edit as needed)
+    // Default Target Values
     const defaultTargets = {
       "Net Trending GP": "",
       "Current Rank": "86",
@@ -557,19 +571,25 @@
 
       let prevValues = (allData[selectedStore] && allData[selectedStore][selectedWeek]) || {};
       formMetricsDiv.innerHTML = metrics.map(metric => `
-        <label>
-          ${metric}: 
-          <input type="text" name="${metric}" required value="${prevValues[metric] || ""}" autocomplete="off" />
-          <span class="target-label">Target:</span>
-          <input class="target-input" type="text" name="target_${metric}" value="${storeTargets[metric] || defaultTargets[metric] || ""}" autocomplete="off" />
-        </label>
+        <div class="metric-row">
+          <span class="metric-label">${metric}:</span>
+          <div class="entry-row">
+            <div class="entry-col">
+              <span class="entry-label">Target</span>
+              <input class="target-input" type="text" name="target_${metric}" value="${storeTargets[metric] || defaultTargets[metric] || ""}" autocomplete="off" />
+            </div>
+            <div class="entry-col">
+              <span class="entry-label">Current</span>
+              <input class="current-input" type="text" name="${metric}" required value="${prevValues[metric] || ""}" autocomplete="off" />
+            </div>
+          </div>
+        </div>
       `).join('');
       selectionSection.classList.add('hidden');
       metricsSection.classList.remove('hidden');
       tableSection.classList.add('hidden');
     };
 
-    // Data entry page, next button
     metricsForm.onsubmit = function(e) {
       e.preventDefault();
       metricsData = {};
@@ -640,7 +660,6 @@
           delete allData[selectedStore];
           saveAllData();
         }
-        // Also clear targets for this store:
         let raw = localStorage.getItem(TARGETS_KEY);
         let allTargets = raw ? JSON.parse(raw) : {};
         delete allTargets[getStoreTargetKey(selectedStore)];
