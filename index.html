@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Weekly Business Review</title>
+  <title>Performance, Forms, Commitments</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -11,6 +11,7 @@
       --primary-border: #d1d5db;
       --primary-radius: 8px;
       --primary-font: 'Segoe UI', Arial, sans-serif;
+      --target-highlight: #fff59d;
     }
     html, body {
       margin: 0;
@@ -53,7 +54,6 @@
       font-weight: 400;
       font-size: 0.98em !important;
       color: #666;
-      display: block;
     }
     .target-input {
       font-size: 0.98em;
@@ -139,6 +139,10 @@
     th {
       background: #ffebee;
       color: var(--primary-accent);
+    }
+    .target-cell {
+      background: var(--target-highlight) !important;
+      font-weight: 600;
     }
     #tableTitle {
       text-align: center;
@@ -286,7 +290,6 @@
 </head>
 <body>
   <h1>Weekly Business Review</h1>
-
   <!-- Selection Page -->
   <div id="selectionSection">
     <form id="selectionForm" autocomplete="off">
@@ -369,14 +372,29 @@
   </div>
 
   <script>
-    // ---- Metric definitions, formatters, and default targets ----
+    // --- Metric definitions, formatters, and default targets ---
     const metrics = [
       "Net Trending GP", "Current Rank", "Current Quintile", "Bottom Metrics",
       "GP % Target", "GP per HR", "Voice", "BTS", "TFB", "VAF",
       "Accessories", "CSAT", "AAL Attainment"
     ];
-
-    // Pre-populated target defaults
+    const metricFormatters = {
+      "Net Trending GP": v => formatDollarNoCents(v),
+      "GP % Target": v => formatPercentNoDecimal(v),
+      "GP per HR": v => formatDollar(v),
+      "Voice": v => formatPercentNoDecimal(v),
+      "BTS": v => formatPercentNoDecimal(v),
+      "TFB": v => formatPercentNoDecimal(v),
+      "VAF": v => formatDollar(v),
+      "Accessories": v => formatPercentNoDecimal(v),
+      "AAL Attainment": v => formatPercentNoDecimal(v),
+      // Raw for these below, since their targets aren't formatted as percent/dollar
+      "Current Rank": v => v,
+      "Current Quintile": v => v,
+      "Bottom Metrics": v => v,
+      "CSAT": v => v
+    };
+    // Default Target Values (edit as needed)
     const defaultTargets = {
       "Net Trending GP": "",
       "Current Rank": "86",
@@ -387,38 +405,24 @@
       "Voice": "125%",
       "BTS": "125%",
       "TFB": "125%",
-      "VAF": "",
-      "Accessories": "",
-      "CSAT": "",
-      "AAL Attainment": ""
-    };
-
-    const metricFormatters = {
-      "Net Trending GP": v => formatDollarNoCents(v),
-      "GP % Target": v => formatPercentNoDecimal(v),
-      "GP per HR": v => formatDollar(v),
-      "Voice": v => formatPercentNoDecimal(v),
-      "BTS": v => formatPercentNoDecimal(v),
-      "TFB": v => formatPercentNoDecimal(v),
-      "VAF": v => formatDollar(v),
-      "Accessories": v => formatPercentNoDecimal(v),
-      "AAL Attainment": v => formatPercentNoDecimal(v)
+      "VAF": "$19",
+      "Accessories": "125%",
+      "CSAT": "9.5",
+      "AAL Attainment": "100%"
     };
 
     function formatDollarNoCents(val) {
-      let n = parseFloat(val.replace(/[^0-9.\-]/g, ""));
-      if (isNaN(n)) return "";
+      let n = parseFloat(val.replace(/[^0-9.\-]/g, "")); if (isNaN(n)) return "";
       return "$" + Math.round(n).toLocaleString();
     }
     function formatDollar(val) {
-      let n = parseFloat(val.replace(/[^0-9.\-]/g, ""));
-      if (isNaN(n)) return "";
-      return "$" + n.toLocaleString(undefined, {minimumFractionDigits:2,maximumFractionDigits:2});
+      let n = parseFloat(val.replace(/[^0-9.\-]/g, "")); if (isNaN(n)) return "";
+      return "$" + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
     }
     function formatPercentNoDecimal(val) {
       let n = parseFloat(val.replace(/[^0-9.\-]/g, ""));
       if (isNaN(n)) return "";
-      if (n <= 1 && n !== 0) n = n * 100;
+      if (n <= 1 && n !== 0) n = n*100;
       return Math.round(n) + "%";
     }
 
@@ -457,7 +461,7 @@
     const STORAGE_KEY = "locationPerformanceData";
     const TARGETS_KEY = "locationTargetData";
 
-    // Target management
+    // --- Target management ---
     function getStoreTargetKey(store) {
       return store ? store : "default";
     }
@@ -530,6 +534,7 @@
       selectedStore = this.value;
     });
 
+    // Load all data from localStorage
     function loadAllData() {
       const raw = localStorage.getItem(STORAGE_KEY);
       allData = raw ? JSON.parse(raw) : {};
@@ -538,6 +543,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
     }
 
+    // Selection page submit
     selectionForm.onsubmit = function(e) {
       e.preventDefault();
       selectedArea = areaDropdown.value;
@@ -563,6 +569,7 @@
       tableSection.classList.add('hidden');
     };
 
+    // Data entry page, next button
     metricsForm.onsubmit = function(e) {
       e.preventDefault();
       metricsData = {};
@@ -633,6 +640,7 @@
           delete allData[selectedStore];
           saveAllData();
         }
+        // Also clear targets for this store:
         let raw = localStorage.getItem(TARGETS_KEY);
         let allTargets = raw ? JSON.parse(raw) : {};
         delete allTargets[getStoreTargetKey(selectedStore)];
@@ -710,7 +718,7 @@
       printMeta.textContent = `Area: ${selectedArea} | Region: ${selectedRegion} | District: ${selectedDistrict} | Store: ${selectedStore} | Printed: ${dtStr}`;
       metricsTable.innerHTML = metrics.map(metric => {
         let row = `<td>${metric}</td>`;
-        row += `<td>${storeTargets[metric] || defaultTargets[metric] || ""}</td>`;
+        row += `<td class="target-cell">${storeTargets[metric] || defaultTargets[metric] || ""}</td>`;
         for(let i=1; i<=5; i++) {
           row += `<td>${locWeeks[i] && locWeeks[i][metric] ? locWeeks[i][metric] : ""}</td>`;
         }
