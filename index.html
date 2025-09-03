@@ -496,24 +496,24 @@
     ];
     // Table cell formatters for gaps metrics (week data, not targets)
     const gapsCellTableFormatters = {
-      "Voice": v => formatInteger(v),
-      "BTS": v => formatInteger(v),
-      "TFB": v => formatInteger(v),
+      "Voice": v => formatNumberNoDecimal(v),
+      "BTS": v => formatNumberNoDecimal(v),
+      "TFB": v => formatNumberNoDecimal(v),
       "VAF": v => formatDollarNoCents(v),
       "Accessory Qty": v => formatDollarNoCents(v)
     };
     // Form entry formatters for gaps metrics
     const gapsFormatters = {
-      "Voice": v => v,
-      "BTS": v => v,
-      "TFB": v => v,
-      "VAF": v => v,
-      "Accessory Qty": v => v
+      "Voice": v => formatNumberNoDecimal(v),
+      "BTS": v => formatNumberNoDecimal(v),
+      "TFB": v => formatNumberNoDecimal(v),
+      "VAF": v => formatDollarNoCents(v),
+      "Accessory Qty": v => formatDollarNoCents(v)
     };
     const defaultGapsTargets = {
-      "Voice": "125%",
-      "BTS": "125%",
-      "TFB": "125%",
+      "Voice": "",
+      "BTS": "",
+      "TFB": "",
       "VAF": "$19",
       "Accessory Qty": "125%"
     };
