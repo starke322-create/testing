@@ -307,7 +307,7 @@
         max-width: none;
         padding: 0;
       }
-      h1, #metricsSection, .actions, .form-metrics, #backToMetrics, #clearAllData, #printTableBtn, #selectionSection, #metricsForm, button, .actions, .hidden, .reset-targets-btn {
+      h1, #metricsSection, #gapsSection, .actions, .form-metrics, .form-gaps, #backToMetrics, #clearAllData, #printTableBtn, #selectionSection, #metricsForm, #gapsForm, button, .actions, .hidden, .reset-targets-btn {
         display: none !important;
       }
       #tableSection, #tableTitle, #printMeta, .table-container, table, thead, tbody, tr, th, td {
@@ -401,15 +401,28 @@
     </form>
   </div>
 
-  <!-- Data Entry Page -->
+  <!-- CS Leaderboard Data Entry Page -->
   <div id="metricsSection" class="hidden">
-    <div class="section-title" id="metricsSectionTitle">CS Leaderboard</div>
+    <div class="section-title">CS Leaderboard</div>
     <form id="metricsForm" autocomplete="off">
       <div class="form-metrics"></div>
       <button type="button" class="reset-targets-btn" id="resetTargetsBtn">Reset Targets to Default</button>
       <div class="actions">
         <button type="button" id="backButton">Back</button>
-        <button type="submit" id="nextBtn">Next</button>
+        <button type="button" id="nextToGapsBtn">Next</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Current Gaps Data Entry Page -->
+  <div id="gapsSection" class="hidden">
+    <div class="section-title">Current Gaps</div>
+    <form id="gapsForm" autocomplete="off">
+      <div class="form-gaps"></div>
+      <button type="button" class="reset-targets-btn" id="resetGapsTargetsBtn">Reset Targets to Default</button>
+      <div class="actions">
+        <button type="button" id="backToLeaderboardBtn">Back</button>
+        <button type="submit" id="nextBtnGaps">Next</button>
       </div>
     </form>
   </div>
@@ -429,6 +442,7 @@
           </tr>
         </thead>
         <tbody id="metricsTable"></tbody>
+        <tbody id="gapsTable"></tbody>
       </table>
     </div>
     <div class="actions" id="tableActions">
@@ -439,7 +453,7 @@
   </div>
 
   <script>
-    // Metric definitions, formatters, and default targets
+    // CS Leaderboard metrics and targets
     const metrics = [
       "Net Trending GP", "Current Rank", "Current Quintile", "Bottom Metrics",
       "GP % Target", "GP per HR", "Voice", "BTS", "TFB", "VAF",
@@ -476,6 +490,25 @@
       "AAL Attainment": "100%"
     };
 
+    // Current Gaps metrics and targets
+    const gapsMetrics = [
+      "Voice", "BTS", "TFB", "VAF", "Accessory Qty"
+    ];
+    const gapsFormatters = {
+      "Voice": v => formatPercentNoDecimal(v),
+      "BTS": v => formatPercentNoDecimal(v),
+      "TFB": v => formatPercentNoDecimal(v),
+      "VAF": v => formatDollar(v),
+      "Accessory Qty": v => formatPercentNoDecimal(v)
+    };
+    const defaultGapsTargets = {
+      "Voice": "125%",
+      "BTS": "125%",
+      "TFB": "125%",
+      "VAF": "$19",
+      "Accessory Qty": "125%"
+    };
+
     function formatDollarNoCents(val) {
       let n = parseFloat(val.replace(/[^0-9.\-]/g, "")); if (isNaN(n)) return "";
       return "$" + Math.round(n).toLocaleString();
@@ -499,20 +532,32 @@
     const districtDropdown = document.getElementById('districtDropdown');
     const storeDropdown = document.getElementById('storeDropdown');
     const weekSelect = document.getElementById('weekSelect');
+
+    // CS Leaderboard section
     const metricsSection = document.getElementById('metricsSection');
-    const metricsSectionTitle = document.getElementById('metricsSectionTitle');
     const metricsForm = document.getElementById('metricsForm');
     const formMetricsDiv = metricsForm.querySelector('.form-metrics');
     const resetTargetsBtn = document.getElementById('resetTargetsBtn');
     const backButton = document.getElementById('backButton');
-    const nextBtn = document.getElementById('nextBtn');
+    const nextToGapsBtn = document.getElementById('nextToGapsBtn');
+
+    // Current Gaps section
+    const gapsSection = document.getElementById('gapsSection');
+    const gapsForm = document.getElementById('gapsForm');
+    const formGapsDiv = gapsForm.querySelector('.form-gaps');
+    const resetGapsTargetsBtn = document.getElementById('resetGapsTargetsBtn');
+    const backToLeaderboardBtn = document.getElementById('backToLeaderboardBtn');
+    const nextBtnGaps = document.getElementById('nextBtnGaps');
+
+    // Table section
     const tableSection = document.getElementById('tableSection');
     const tableTitle = document.getElementById('tableTitle');
     const printMeta = document.getElementById('printMeta');
-    const metricsTable = document.getElementById('metricsTable');
     const mainMetricsTable = document.getElementById('mainMetricsTable');
     const metricsHeaderRow = document.getElementById('metricsHeaderRow');
     const leaderboardRow = document.getElementById('leaderboardRow');
+    const metricsTable = document.getElementById('metricsTable');
+    const gapsTable = document.getElementById('gapsTable');
     const backToMetricsBtn = document.getElementById('backToMetrics');
     const clearAllDataBtn = document.getElementById('clearAllData');
     const printTableBtn = document.getElementById('printTableBtn');
@@ -527,8 +572,13 @@
     let metricsData = {};
     let allData = {};
     let storeTargets = {};
+    let gapsData = {};
+    let allGapsData = {};
+    let gapsTargets = {};
     const STORAGE_KEY = "locationPerformanceData";
     const TARGETS_KEY = "locationTargetData";
+    const GAPS_STORAGE_KEY = "locationGapsData";
+    const GAPS_TARGETS_KEY = "locationGapsTargetData";
 
     function getStoreTargetKey(store) {
       return store ? store : "default";
@@ -546,6 +596,36 @@
     }
     function resetStoreTargets(store) {
       saveTargets(store, {...defaultTargets});
+    }
+
+    function loadGapsTargets(store) {
+      let raw = localStorage.getItem(GAPS_TARGETS_KEY);
+      let allTargets = raw ? JSON.parse(raw) : {};
+      return allTargets[getStoreTargetKey(store)] || {...defaultGapsTargets};
+    }
+    function saveGapsTargets(store, targets) {
+      let raw = localStorage.getItem(GAPS_TARGETS_KEY);
+      let allTargets = raw ? JSON.parse(raw) : {};
+      allTargets[getStoreTargetKey(store)] = {...targets};
+      localStorage.setItem(GAPS_TARGETS_KEY, JSON.stringify(allTargets));
+    }
+    function resetStoreGapsTargets(store) {
+      saveGapsTargets(store, {...defaultGapsTargets});
+    }
+
+    function loadAllData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      allData = raw ? JSON.parse(raw) : {};
+    }
+    function saveAllData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+    }
+    function loadAllGapsData() {
+      const raw = localStorage.getItem(GAPS_STORAGE_KEY);
+      allGapsData = raw ? JSON.parse(raw) : {};
+    }
+    function saveAllGapsData() {
+      localStorage.setItem(GAPS_STORAGE_KEY, JSON.stringify(allGapsData));
     }
 
     function populateAreaDropdown() {
@@ -601,14 +681,6 @@
       selectedStore = this.value;
     });
 
-    function loadAllData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      allData = raw ? JSON.parse(raw) : {};
-    }
-    function saveAllData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
-    }
-
     selectionForm.onsubmit = function(e) {
       e.preventDefault();
       selectedArea = areaDropdown.value;
@@ -638,11 +710,15 @@
       `).join('');
       selectionSection.classList.add('hidden');
       metricsSection.classList.remove('hidden');
+      gapsSection.classList.add('hidden');
       tableSection.classList.add('hidden');
     };
 
     metricsForm.onsubmit = function(e) {
       e.preventDefault();
+    };
+    nextToGapsBtn.onclick = function() {
+      // Save leaderboard data
       metricsData = {};
       let newTargets = {};
       metrics.forEach(metric => {
@@ -659,6 +735,50 @@
       saveAllData();
       saveTargets(selectedStore, newTargets);
       storeTargets = {...newTargets};
+
+      // Load gaps targets and previous values
+      loadAllGapsData();
+      gapsTargets = loadGapsTargets(selectedStore);
+      let prevGapsValues = (allGapsData[selectedStore] && allGapsData[selectedStore][selectedWeek]) || {};
+      formGapsDiv.innerHTML = gapsMetrics.map(metric => `
+        <div class="metric-row">
+          <span class="metric-label">${metric}:</span>
+          <div class="entry-row">
+            <div class="entry-col">
+              <span class="entry-label">Target</span>
+              <input class="target-input" type="text" name="target_gaps_${metric}" value="${gapsTargets[metric] || defaultGapsTargets[metric] || ""}" autocomplete="off" />
+            </div>
+            <div class="entry-col">
+              <span class="entry-label">Current</span>
+              <input class="current-input" type="text" name="gaps_${metric}" required value="${prevGapsValues[metric] || ""}" autocomplete="off" />
+            </div>
+          </div>
+        </div>
+      `).join('');
+      metricsSection.classList.add('hidden');
+      gapsSection.classList.remove('hidden');
+      tableSection.classList.add('hidden');
+    };
+
+    gapsForm.onsubmit = function(e) {
+      e.preventDefault();
+      // Save gaps data
+      gapsData = {};
+      let newGapsTargets = {};
+      gapsMetrics.forEach(metric => {
+        let raw = gapsForm.elements["gaps_" + metric].value;
+        gapsData[metric] = gapsFormatters[metric]
+          ? gapsFormatters[metric](raw)
+          : raw;
+        let targetRaw = gapsForm.elements["target_gaps_" + metric].value;
+        newGapsTargets[metric] = targetRaw;
+      });
+      loadAllGapsData();
+      if (!allGapsData[selectedStore]) allGapsData[selectedStore] = {};
+      allGapsData[selectedStore][selectedWeek] = {...gapsData};
+      saveAllGapsData();
+      saveGapsTargets(selectedStore, newGapsTargets);
+      gapsTargets = {...newGapsTargets};
       renderTable();
     };
 
@@ -673,9 +793,21 @@
       });
     };
 
+    resetGapsTargetsBtn.onclick = function() {
+      if (!selectedStore) return;
+      resetStoreGapsTargets(selectedStore);
+      gapsTargets = loadGapsTargets(selectedStore);
+      gapsMetrics.forEach(metric => {
+        if (gapsForm.elements["target_gaps_" + metric]) {
+          gapsForm.elements["target_gaps_" + metric].value = defaultGapsTargets[metric] || "";
+        }
+      });
+    };
+
     backButton.onclick = function() {
       selectionSection.classList.remove('hidden');
       metricsSection.classList.add('hidden');
+      gapsSection.classList.add('hidden');
       tableSection.classList.add('hidden');
       areaDropdown.value = selectedArea;
       areaDropdown.dispatchEvent(new Event('change'));
@@ -687,7 +819,8 @@
       weekSelect.value = selectedWeek;
     };
 
-    backToMetricsBtn.onclick = function() {
+    backToLeaderboardBtn.onclick = function() {
+      // Re-populate leaderboard form with previous values
       loadAllData();
       storeTargets = loadTargets(selectedStore);
       let prevValues = (allData[selectedStore] && allData[selectedStore][selectedWeek]) || {};
@@ -695,8 +828,24 @@
         metricsForm.elements[metric].value = prevValues[metric] || "";
         metricsForm.elements["target_" + metric].value = storeTargets[metric] || defaultTargets[metric] || "";
       });
-      tableSection.classList.add('hidden');
+      gapsSection.classList.add('hidden');
       metricsSection.classList.remove('hidden');
+      selectionSection.classList.add('hidden');
+      tableSection.classList.add('hidden');
+    };
+
+    backToMetricsBtn.onclick = function() {
+      // Back to gaps data entry
+      loadAllGapsData();
+      gapsTargets = loadGapsTargets(selectedStore);
+      let prevGapsValues = (allGapsData[selectedStore] && allGapsData[selectedStore][selectedWeek]) || {};
+      gapsMetrics.forEach(metric => {
+        gapsForm.elements["gaps_" + metric].value = prevGapsValues[metric] || "";
+        gapsForm.elements["target_gaps_" + metric].value = gapsTargets[metric] || defaultGapsTargets[metric] || "";
+      });
+      tableSection.classList.add('hidden');
+      gapsSection.classList.remove('hidden');
+      metricsSection.classList.add('hidden');
       selectionSection.classList.add('hidden');
     };
 
@@ -715,8 +864,20 @@
         let allTargets = raw ? JSON.parse(raw) : {};
         delete allTargets[getStoreTargetKey(selectedStore)];
         localStorage.setItem(TARGETS_KEY, JSON.stringify(allTargets));
+
+        loadAllGapsData();
+        if (allGapsData[selectedStore]) {
+          delete allGapsData[selectedStore];
+          saveAllGapsData();
+        }
+        let rawGaps = localStorage.getItem(GAPS_TARGETS_KEY);
+        let allGapsTargets = rawGaps ? JSON.parse(rawGaps) : {};
+        delete allGapsTargets[getStoreTargetKey(selectedStore)];
+        localStorage.setItem(GAPS_TARGETS_KEY, JSON.stringify(allGapsTargets));
+
         selectionSection.classList.remove('hidden');
         metricsSection.classList.add('hidden');
+        gapsSection.classList.add('hidden');
         tableSection.classList.add('hidden');
         areaDropdown.value = "";
         regionDropdown.innerHTML = '<option value="">--Select Region--</option>';
@@ -738,8 +899,8 @@
         useCORS: true,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: document.body.scrollWidth,
-        windowHeight: document.body.scrollHeight,
+        windowWidth: tableSection.scrollWidth,
+        windowHeight: tableSection.scrollHeight,
       }).then(function(canvas) {
         tableWrapper.style.maxWidth = "";
         tableWrapper.style.margin = "";
@@ -808,6 +969,10 @@
       loadAllData();
       storeTargets = loadTargets(selectedStore);
       let locWeeks = allData[selectedStore] || {};
+      loadAllGapsData();
+      gapsTargets = loadGapsTargets(selectedStore);
+      let locGapsWeeks = allGapsData[selectedStore] || {};
+
       tableTitle.textContent = `Store: ${selectedStore}`;
       let now = new Date();
       let dtStr = now.toLocaleString(undefined, {
@@ -827,10 +992,10 @@
         <th>Week 5</th>
       `;
       metricsHeaderRow.innerHTML = headerHTML;
-
-      // CS Leaderboard row merged across all columns
+      // CS Leaderboard row
       leaderboardRow.innerHTML = `<td colspan="7" style="background:#DC008C;color:#111;font-weight:700;font-size:1.03em;letter-spacing:1.5px;text-align:center;border:none;">CS Leaderboard</td>`;
 
+      // CS Leaderboard table body
       metricsTable.innerHTML = metrics.map(metric => {
         let row = `<td>${metric}</td>`;
         row += `<td class="target-cell">${storeTargets[metric] || defaultTargets[metric] || ""}</td>`;
@@ -839,8 +1004,21 @@
         }
         return `<tr>${row}</tr>`;
       }).join('');
+      // Current Gaps table body with section row
+      let gapsSectionRow = `<tr class="leaderboard-row"><td colspan="7">Current Gaps</td></tr>`;
+      let gapsRows = gapsMetrics.map(metric => {
+        let row = `<td>${metric}</td>`;
+        row += `<td class="target-cell">${gapsTargets[metric] || defaultGapsTargets[metric] || ""}</td>`;
+        for(let i=1; i<=5; i++) {
+          row += `<td>${locGapsWeeks[i] && locGapsWeeks[i][metric] ? locGapsWeeks[i][metric] : ""}</td>`;
+        }
+        return `<tr>${row}</tr>`;
+      }).join('');
+      gapsTable.innerHTML = gapsSectionRow + gapsRows;
+
+      // Mobile data-labels
       if (window.innerWidth <= 700) {
-        let trs = metricsTable.querySelectorAll("tr");
+        let trs = mainMetricsTable.querySelectorAll("tbody tr:not(.leaderboard-row)");
         trs.forEach((tr, idx) => {
           let tds = tr.querySelectorAll("td");
           if (tds.length === 7) {
@@ -854,6 +1032,7 @@
       }
       selectionSection.classList.add('hidden');
       metricsSection.classList.add('hidden');
+      gapsSection.classList.add('hidden');
       tableSection.classList.remove('hidden');
     }
 
@@ -863,6 +1042,7 @@
 
     populateAreaDropdown();
     loadAllData();
+    loadAllGapsData();
   </script>
 </body>
 </html>
