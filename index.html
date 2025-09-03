@@ -518,13 +518,25 @@
       "Accessory Qty": "125%"
     };
 
-    // Table cell formatters for rows 17,18,19 (columns 2-6)
-    function formatRow171819(cellValue) {
-      let n = parseFloat(cellValue.replace(/[^0-9.\-]/g, ""));
+    function formatDollarNoCents(val) {
+      let n = parseFloat(val.replace(/[^0-9.\-]/g, "")); if (isNaN(n)) return "";
+      return "$" + Math.round(n).toLocaleString();
+    }
+    function formatDollar(val) {
+      let n = parseFloat(val.replace(/[^0-9.\-]/g, "")); if (isNaN(n)) return "";
+      return "$" + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+    function formatPercentNoDecimal(val) {
+      let n = parseFloat(val.replace(/[^0-9.\-]/g, ""));
+      if (isNaN(n)) return "";
+      if (n <= 1 && n !== 0) n = n*100;
+      return Math.round(n) + "%";
+    }
+    function formatInteger(val) {
+      let n = parseFloat(val.replace(/[^0-9.\-]/g, ""));
       if (isNaN(n)) return "";
       return Math.round(n).toString();
     }
-    const specialRows = [16, 17, 18]; // 0-based index (rows 17,18,19)
 
     // Elements
     const selectionSection = document.getElementById('selectionSection');
@@ -720,6 +732,7 @@
       e.preventDefault();
     };
     nextToGapsBtn.onclick = function() {
+      // Save leaderboard data
       metricsData = {};
       let newTargets = {};
       metrics.forEach(metric => {
@@ -737,7 +750,7 @@
       saveTargets(selectedStore, newTargets);
       storeTargets = {...newTargets};
 
-      // Load gaps targets and previous values (save gaps data to localStorage)
+      // Load gaps targets and previous values
       loadAllGapsData();
       gapsTargets = loadGapsTargets(selectedStore);
       let prevGapsValues = (allGapsData[selectedStore] && allGapsData[selectedStore][selectedWeek]) || {};
@@ -796,10 +809,8 @@
 
     resetGapsTargetsBtn.onclick = function() {
       if (!selectedStore) return;
-      // Only reset targets, not data
       resetStoreGapsTargets(selectedStore);
       gapsTargets = loadGapsTargets(selectedStore);
-      // Re-populate target fields with default targets, keep current data from localStorage
       gapsMetrics.forEach(metric => {
         if (gapsForm.elements["target_gaps_" + metric]) {
           gapsForm.elements["target_gaps_" + metric].value = defaultGapsTargets[metric] || "";
@@ -823,6 +834,7 @@
     };
 
     backToLeaderboardBtn.onclick = function() {
+      // Re-populate leaderboard form with previous values
       loadAllData();
       storeTargets = loadTargets(selectedStore);
       let prevValues = (allData[selectedStore] && allData[selectedStore][selectedWeek]) || {};
@@ -837,6 +849,7 @@
     };
 
     backToMetricsBtn.onclick = function() {
+      // Back to gaps data entry
       loadAllGapsData();
       gapsTargets = loadGapsTargets(selectedStore);
       let prevGapsValues = (allGapsData[selectedStore] && allGapsData[selectedStore][selectedWeek]) || {};
@@ -1007,24 +1020,14 @@
       }).join('');
       // Current Gaps table body with section row
       let gapsSectionRow = `<tr class="leaderboard-row"><td colspan="7">Current Gaps</td></tr>`;
-      let gapsRows = gapsMetrics.map((metric, idx) => {
+      let gapsRows = gapsMetrics.map(metric => {
         let row = `<td>${metric}</td>`;
         row += `<td class="target-cell">${gapsTargets[metric] || defaultGapsTargets[metric] || ""}</td>`;
         for(let i=1; i<=5; i++) {
           let cellValue = locGapsWeeks[i] && locGapsWeeks[i][metric] ? locGapsWeeks[i][metric] : "";
           // Apply requested cell formatting for gaps metrics
           if (cellValue !== "") {
-            // Format rows 17,18,19 (idx 2,3,4) columns 2-6 as integer
-            if (specialRows.includes(idx + metrics.length)) {
-              // columns 2-6: i = 2..6
-              if (i >= 2 && i <= 6) {
-                row += `<td>${formatRow171819(cellValue)}</td>`;
-              } else {
-                row += `<td>${gapsCellTableFormatters[metric] ? gapsCellTableFormatters[metric](cellValue) : cellValue}</td>`;
-              }
-            } else {
-              row += `<td>${gapsCellTableFormatters[metric] ? gapsCellTableFormatters[metric](cellValue) : cellValue}</td>`;
-            }
+            row += `<td>${gapsCellTableFormatters[metric] ? gapsCellTableFormatters[metric](cellValue) : cellValue}</td>`;
           } else {
             row += `<td></td>`;
           }
