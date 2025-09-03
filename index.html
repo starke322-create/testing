@@ -13,6 +13,8 @@
       --primary-font: 'Segoe UI', Arial, sans-serif;
       --target-highlight: #fff59d;
       --target-entry-color: #d32f2f;
+      --leaderboard-bg: #DC008C;
+      --leaderboard-color: #111;
     }
     html, body {
       margin: 0;
@@ -208,6 +210,16 @@
       font-weight: 700;
       color: var(--primary-accent) !important;
     }
+    .leaderboard-row td {
+      background: var(--leaderboard-bg) !important;
+      color: var(--leaderboard-color) !important;
+      font-weight: 700;
+      font-size: 1.03em;
+      letter-spacing: 1.5px;
+      text-align: center;
+      border: none !important;
+      padding: 0.8em 0 !important;
+    }
     @media (max-width: 700px) {
       body {
         padding: 0.2em 0.05em 2em 0.05em;
@@ -257,6 +269,11 @@
         padding-left: 1em;
         color: var(--primary-accent);
         font-size: 1em;
+      }
+      .leaderboard-row td {
+        padding-left: 0 !important;
+        text-align: center !important;
+        font-size: 1em !important;
       }
     }
     @media (max-width: 430px) {
@@ -312,6 +329,16 @@
       th {
         color: #000 !important;
         background: #eee !important;
+      }
+      .leaderboard-row td {
+        background: #DC008C !important;
+        color: #111 !important;
+        border: none !important;
+        font-weight: 700 !important;
+        font-size: 1.03em !important;
+        letter-spacing: 1.5px !important;
+        text-align: center !important;
+        padding: 0.7em 0 !important;
       }
       @page {
         size: portrait;
@@ -384,6 +411,9 @@
         <thead>
           <tr class="header-row" id="metricsHeaderRow">
             <!-- Headers rendered dynamically -->
+          </tr>
+          <tr class="leaderboard-row" id="leaderboardRow">
+            <!-- CS Leaderboard row rendered dynamically -->
           </tr>
         </thead>
         <tbody id="metricsTable"></tbody>
@@ -469,6 +499,7 @@
     const metricsTable = document.getElementById('metricsTable');
     const mainMetricsTable = document.getElementById('mainMetricsTable');
     const metricsHeaderRow = document.getElementById('metricsHeaderRow');
+    const leaderboardRow = document.getElementById('leaderboardRow');
     const backToMetricsBtn = document.getElementById('backToMetrics');
     const clearAllDataBtn = document.getElementById('clearAllData');
     const printTableBtn = document.getElementById('printTableBtn');
@@ -686,7 +717,6 @@
     };
 
     printTableBtn.onclick = function() {
-      // Set the table container to max width for print screenshot
       tableWrapper.style.maxWidth = "900px";
       tableWrapper.style.margin = "0 auto";
       html2canvas(tableSection, {
@@ -784,6 +814,9 @@
         <th>Week 5</th>
       `;
       metricsHeaderRow.innerHTML = headerHTML;
+
+      // CS Leaderboard row merged across all columns
+      leaderboardRow.innerHTML = `<td colspan="7" style="background:#DC008C;color:#111;font-weight:700;font-size:1.03em;letter-spacing:1.5px;text-align:center;border:none;">CS Leaderboard</td>`;
 
       metricsTable.innerHTML = metrics.map(metric => {
         let row = `<td>${metric}</td>`;
