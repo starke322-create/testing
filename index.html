@@ -15,6 +15,9 @@
       --target-entry-color: #d32f2f;
       --leaderboard-bg: #DC008C;
       --leaderboard-color: #111;
+      --metric-grey: #ededed;
+      --store-black: #111;
+      --store-white: #fff;
     }
     html, body {
       margin: 0;
@@ -216,6 +219,20 @@
       font-size: 1em;
       font-weight: 700;
     }
+    /* Metric name cells & pre-CS row */
+    .metric-cell, .pre-cs-row td {
+      background: var(--metric-grey) !important;
+      color: #222 !important;
+      font-weight: 600;
+    }
+    /* Store name cell */
+    .store-cell {
+      background: var(--store-black) !important;
+      color: var(--store-white) !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.7px;
+      font-size: 1em;
+    }
     .target-cell {
       background: var(--target-highlight) !important;
       font-weight: 700;
@@ -274,17 +291,21 @@
         color: #555;
       }
       tr td:first-child {
-        background: #ffebee;
+        background: var(--metric-grey) !important;
         border-radius: var(--primary-radius) var(--primary-radius) 0 0;
         font-weight: 700;
         padding-left: 1em;
-        color: var(--primary-accent);
+        color: #222 !important;
         font-size: 1em;
       }
       .leaderboard-row td {
         padding-left: 0 !important;
         text-align: center !important;
         font-size: 1em !important;
+      }
+      .store-cell {
+        background: var(--store-black) !important;
+        color: var(--store-white) !important;
       }
     }
     @media (max-width: 430px) {
@@ -350,6 +371,17 @@
         letter-spacing: 1.5px !important;
         text-align: center !important;
         padding: 0.7em 0 !important;
+      }
+      .metric-cell, .pre-cs-row td {
+        background: #ededed !important;
+        color: #222 !important;
+        font-weight: 600 !important;
+      }
+      .store-cell {
+        background: #111 !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.7px !important;
       }
       @page {
         size: portrait;
@@ -447,6 +479,9 @@
     <div class="table-container" id="tableWrapper">
       <table id="mainMetricsTable">
         <thead>
+          <tr class="pre-cs-row">
+            <!-- This row will be rendered dynamically -->
+          </tr>
           <tr class="header-row" id="metricsHeaderRow"></tr>
           <tr class="leaderboard-row" id="leaderboardRow"></tr>
         </thead>
@@ -607,6 +642,7 @@
     const mainMetricsTable = document.getElementById('mainMetricsTable');
     const metricsHeaderRow = document.getElementById('metricsHeaderRow');
     const leaderboardRow = document.getElementById('leaderboardRow');
+    const preCSRow = mainMetricsTable.querySelector('.pre-cs-row');
     const metricsTable = document.getElementById('metricsTable');
     const gapsTable = document.getElementById('gapsTable');
     const formsTable = document.getElementById('formsTable');
@@ -1154,7 +1190,7 @@
 
       // Table headers, first column is store name
       let headerHTML = `
-        <th>${selectedStore ? selectedStore : "Metric"}</th>
+        <th class="store-cell">${selectedStore ? selectedStore : "Metric"}</th>
         <th>Target</th>
         <th>Week 1</th>
         <th>Week 2</th>
@@ -1165,9 +1201,16 @@
       metricsHeaderRow.innerHTML = headerHTML;
       leaderboardRow.innerHTML = `<td colspan="7" style="background:#DC008C;color:#111;font-weight:700;font-size:1.03em;letter-spacing:1.5px;text-align:center;border:none;">CS Leaderboard</td>`;
 
+      // Pre-CS row (light grey fill)
+      let preCSRowHTML = '';
+      for (let i = 0; i < 7; i++) {
+        preCSRowHTML += `<td>${i === 0 ? '' : ''}</td>`;
+      }
+      preCSRow.innerHTML = preCSRowHTML;
+
       // CS Leaderboard table body
       metricsTable.innerHTML = metrics.map(metric => {
-        let row = `<td>${metric}</td>`;
+        let row = `<td class="metric-cell">${metric}</td>`;
         row += `<td class="target-cell">${storeTargets[metric] || defaultTargets[metric] || ""}</td>`;
         for(let i=1; i<=5; i++) {
           row += `<td>${locWeeks[i] && locWeeks[i][metric] ? locWeeks[i][metric] : ""}</td>`;
@@ -1177,7 +1220,7 @@
       // Current Gaps table body with section row
       let gapsSectionRow = `<tr class="leaderboard-row"><td colspan="7">Current Gaps</td></tr>`;
       let gapsRows = gapsMetrics.map(metric => {
-        let row = `<td>${metric}</td>`;
+        let row = `<td class="metric-cell">${metric}</td>`;
         row += `<td class="target-cell">${gapsTargets[metric] || defaultGapsTargets[metric] || ""}</td>`;
         for(let i=1; i<=5; i++) {
           let cellValue = locGapsWeeks[i] && locGapsWeeks[i][metric] ? locGapsWeeks[i][metric] : "";
@@ -1194,7 +1237,7 @@
       // Form Usage table body with section row
       let formsSectionRow = `<tr class="leaderboard-row"><td colspan="7">Form Usage (previous week)</td></tr>`;
       let formsRows = formsMetrics.map(metric => {
-        let row = `<td>${metric}</td>`;
+        let row = `<td class="metric-cell">${metric}</td>`;
         row += `<td class="target-cell">${formsTargets[metric] || defaultFormsTargets[metric] || ""}</td>`;
         for(let i=1; i<=5; i++) {
           let cellValue = locFormsWeeks[i] && locFormsWeeks[i][metric] ? locFormsWeeks[i][metric] : "";
