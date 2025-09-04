@@ -18,6 +18,7 @@
       --metric-grey: #ededed;
       --store-black: #111;
       --store-white: #fff;
+      --white: #fff;
     }
     html, body {
       margin: 0;
@@ -205,6 +206,7 @@
       background: #fff;
       font-size: 0.97em;
       min-width: 530px;
+      table-layout: fixed;
     }
     th, td {
       border: 1px solid var(--primary-border);
@@ -212,6 +214,7 @@
       text-align: center;
       vertical-align: middle;
       word-break: break-word;
+      /* Ensures fixed width for all columns */
     }
     th {
       background: #ffebee;
@@ -247,6 +250,37 @@
       text-align: center;
       border: none !important;
       padding: 0.8em 0 !important;
+    }
+    /* Top merged row */
+    .top-title-row td {
+      background: var(--leaderboard-bg) !important;
+      color: var(--leaderboard-color) !important;
+      font-weight: 700;
+      font-size: 2.4em !important;
+      letter-spacing: 1.5px;
+      text-align: center;
+      border: none !important;
+      padding: 1em 0 !important;
+      border-radius: var(--primary-radius) var(--primary-radius) 0 0;
+    }
+    /* Merged white row above CS Leaderboard */
+    .pre-cs-row td {
+      background: var(--white) !important;
+      color: #222 !important;
+      border: none !important;
+      font-size: 1em;
+      padding: 0.6em 0 !important;
+    }
+    /* Set width for columns 2-7 */
+    th:not(:first-child), td:not(:first-child) {
+      width: 110px;
+      max-width: 110px;
+      min-width: 110px;
+    }
+    .store-cell {
+      width: auto !important;
+      min-width: 90px !important;
+      max-width: 180px !important;
     }
     @media (max-width: 700px) {
       body {
@@ -383,6 +417,12 @@
         font-weight: 700 !important;
         letter-spacing: 0.7px !important;
       }
+      .top-title-row td {
+        background: #DC008C !important;
+        color: #111 !important;
+        font-weight: 700 !important;
+        font-size: 2.4em !important;
+      }
       @page {
         size: portrait;
         margin: 0.45in 0.18in 0.45in 0.18in;
@@ -479,8 +519,11 @@
     <div class="table-container" id="tableWrapper">
       <table id="mainMetricsTable">
         <thead>
+          <tr class="top-title-row">
+            <td colspan="7">Performance & Forms</td>
+          </tr>
           <tr class="pre-cs-row">
-            <!-- This row will be rendered dynamically -->
+            <td colspan="7"></td>
           </tr>
           <tr class="header-row" id="metricsHeaderRow"></tr>
           <tr class="leaderboard-row" id="leaderboardRow"></tr>
@@ -643,6 +686,7 @@
     const metricsHeaderRow = document.getElementById('metricsHeaderRow');
     const leaderboardRow = document.getElementById('leaderboardRow');
     const preCSRow = mainMetricsTable.querySelector('.pre-cs-row');
+    const topTitleRow = mainMetricsTable.querySelector('.top-title-row');
     const metricsTable = document.getElementById('metricsTable');
     const gapsTable = document.getElementById('gapsTable');
     const formsTable = document.getElementById('formsTable');
@@ -1188,6 +1232,11 @@
       });
       printMeta.textContent = `Area: ${selectedArea} | Region: ${selectedRegion} | District: ${selectedDistrict} | Store: ${selectedStore} | Printed: ${dtStr}`;
 
+      // Top merged row
+      topTitleRow.innerHTML = `<td colspan="7">Performance & Forms</td>`;
+      // Pre-CS row (white fill, merged)
+      preCSRow.innerHTML = `<td colspan="7"></td>`;
+
       // Table headers, first column is store name
       let headerHTML = `
         <th class="store-cell">${selectedStore ? selectedStore : "Metric"}</th>
@@ -1200,13 +1249,6 @@
       `;
       metricsHeaderRow.innerHTML = headerHTML;
       leaderboardRow.innerHTML = `<td colspan="7" style="background:#DC008C;color:#111;font-weight:700;font-size:1.03em;letter-spacing:1.5px;text-align:center;border:none;">CS Leaderboard</td>`;
-
-      // Pre-CS row (light grey fill)
-      let preCSRowHTML = '';
-      for (let i = 0; i < 7; i++) {
-        preCSRowHTML += `<td>${i === 0 ? '' : ''}</td>`;
-      }
-      preCSRow.innerHTML = preCSRowHTML;
 
       // CS Leaderboard table body
       metricsTable.innerHTML = metrics.map(metric => {
