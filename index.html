@@ -54,6 +54,7 @@
       padding: 0.6em;
       letter-spacing: 1px;
     }
+    .hidden { display: none !important; }
     form {
       background: #fff;
       padding: 1em 0.7em 1em 0.7em;
@@ -190,19 +191,27 @@
       font-size: 0.97em;
       word-break: break-word;
     }
+    .table-page {
+      display: block;
+      background: var(--white);
+      border-radius: var(--primary-radius);
+      box-shadow: 0 2px 8px 0 #0001;
+      padding: 1em 0.2em;
+      margin-top: 2em;
+      margin-bottom: 2em;
+    }
     .table-container {
       width: 100%;
       overflow-x: auto;
       margin: 0 auto;
       background: #fff;
       border-radius: var(--primary-radius);
-      box-shadow: 0 2px 8px 0 #0001;
-      padding: 0.2em 0.2em;
+      box-shadow: none;
+      padding: 0;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 0.5em 0 0.8em 0;
       background: #fff;
       font-size: 0.97em;
       min-width: 530px;
@@ -214,7 +223,6 @@
       text-align: center;
       vertical-align: middle;
       word-break: break-word;
-      /* Ensures fixed width for all columns */
     }
     th {
       background: #ffebee;
@@ -222,19 +230,21 @@
       font-size: 1em;
       font-weight: 700;
     }
-    /* Metric name cells & pre-CS row */
     .metric-cell, .pre-cs-row td {
       background: var(--metric-grey) !important;
       color: #222 !important;
       font-weight: 600;
     }
-    /* Store name cell */
     .store-cell {
       background: var(--store-black) !important;
       color: var(--store-white) !important;
       font-weight: 700 !important;
       letter-spacing: 0.7px;
       font-size: 1em;
+      width: auto !important;
+      min-width: 90px !important;
+      max-width: 220px !important;
+      white-space: nowrap;
     }
     .target-cell {
       background: var(--target-highlight) !important;
@@ -255,15 +265,14 @@
     .top-title-row td {
       background: var(--leaderboard-bg) !important;
       color: var(--leaderboard-color) !important;
-      font-weight: 700;
-      font-size: 2.4em !important;
+      font-weight: bold !important;
+      font-size: 1.8em !important;
       letter-spacing: 1.5px;
       text-align: center;
       border: none !important;
       padding: 1em 0 !important;
       border-radius: var(--primary-radius) var(--primary-radius) 0 0;
     }
-    /* Merged white row above CS Leaderboard */
     .pre-cs-row td {
       background: var(--white) !important;
       color: #222 !important;
@@ -271,16 +280,10 @@
       font-size: 1em;
       padding: 0.6em 0 !important;
     }
-    /* Set width for columns 2-7 */
     th:not(:first-child), td:not(:first-child) {
       width: 110px;
       max-width: 110px;
       min-width: 110px;
-    }
-    .store-cell {
-      width: auto !important;
-      min-width: 90px !important;
-      max-width: 180px !important;
     }
     @media (max-width: 700px) {
       body {
@@ -340,6 +343,15 @@
       .store-cell {
         background: var(--store-black) !important;
         color: var(--store-white) !important;
+      }
+      th:not(:first-child), td:not(:first-child) {
+        width: 110px !important;
+        max-width: 110px !important;
+        min-width: 110px !important;
+      }
+      .store-cell {
+        min-width: 90px !important;
+        max-width: 220px !important;
       }
     }
     @media (max-width: 430px) {
@@ -420,8 +432,8 @@
       .top-title-row td {
         background: #DC008C !important;
         color: #111 !important;
-        font-weight: 700 !important;
-        font-size: 2.4em !important;
+        font-weight: bold !important;
+        font-size: 1.8em !important;
       }
       @page {
         size: portrait;
@@ -513,7 +525,7 @@
   </div>
 
   <!-- Data Table Page -->
-  <div id="tableSection" class="hidden">
+  <div id="tableSection" class="table-page hidden">
     <div id="printMeta"></div>
     <h2 id="tableTitle"></h2>
     <div class="table-container" id="tableWrapper">
