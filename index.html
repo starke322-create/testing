@@ -275,7 +275,6 @@
       font-size: 1em;
       padding: 0.6em 0 !important;
     }
-    /* Individual column widths applied with JS */
     @media (max-width: 700px) {
       body {
         padding: 0.2em 0.05em 2em 0.05em;
@@ -426,19 +425,11 @@
   <script src="hierarchy.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    // Set individual column widths
+    // Set all column widths to auto
     function setTableColumnWidths() {
       const table = document.getElementById('mainMetricsTable');
       if (!table) return;
-      const colWidths = [
-        'auto',   // Store/Metric column
-        '110px',  // Target
-        '110px',  // Week 1
-        '110px',  // Week 2
-        '110px',  // Week 3
-        '110px',  // Week 4
-        '110px'   // Week 5
-      ];
+      const colWidths = ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'];
       let colgroup = table.querySelector('colgroup');
       if (colgroup) table.removeChild(colgroup);
       colgroup = document.createElement('colgroup');
